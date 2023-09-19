@@ -16,7 +16,7 @@
       "function": {
         "loanHandler": {
           "deploymentBucketName": "amplify-katybdayapp-staging-43519-deployment",
-          "s3Key": "amplify-builds/loanHandler-73354b695261542f7759-build.zip"
+          "s3Key": "amplify-builds/loanHandler-4c554f7274696c575237-build.zip"
         }
       },
       "auth": {
@@ -30,6 +30,12 @@
           "appId": "d2pi4lh7c37eqo",
           "type": "cicd"
         }
+      },
+      "storage": {
+        "loans": {}
+      },
+      "custom": {
+        "loanTopic": {}
       }
     }
   }

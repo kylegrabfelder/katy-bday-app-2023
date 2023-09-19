@@ -19,6 +19,11 @@ export type AmplifyDependentResourcesAttributes = {
       "UserPoolName": "string"
     }
   },
+  "custom": {
+    "loanTopic": {
+      "snsTopicArn": "string"
+    }
+  },
   "function": {
     "loanHandler": {
       "Arn": "string",
@@ -26,6 +31,18 @@ export type AmplifyDependentResourcesAttributes = {
       "LambdaExecutionRoleArn": "string",
       "Name": "string",
       "Region": "string"
+    }
+  },
+  "storage": {
+    "loans": {
+      "Arn": "string",
+      "Name": "string",
+      "PartitionKeyName": "string",
+      "PartitionKeyType": "string",
+      "Region": "string",
+      "SortKeyName": "string",
+      "SortKeyType": "string",
+      "StreamArn": "string"
     }
   }
 }

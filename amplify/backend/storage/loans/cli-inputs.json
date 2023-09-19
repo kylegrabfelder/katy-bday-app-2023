@@ -1,0 +1,14 @@
+{
+  "resourceName": "loans",
+  "tableName": "loans",
+  "partitionKey": {
+    "fieldName": "pk",
+    "fieldType": "string"
+  },
+  "sortKey": {
+    "fieldName": "sk",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}

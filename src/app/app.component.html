@@ -1,9 +1,39 @@
 <amplify-authenticator [hideSignUp]="true">
-  <ng-template
-    amplifySlot="authenticated"
-    let-user="user"
-    let-signOut="signOut"
-  >
-    <p>we're in!</p>
+  <ng-template amplifySlot="authenticated" let-user="user" let-signOut="signOut">
+    <mat-toolbar color="primary">
+      <mat-toolbar-row>
+        <span>Happy Birthday Homie!</span>
+      </mat-toolbar-row>
+    </mat-toolbar>
+
+    <div class="info-text">
+      For the college girl in need of money, here are three free loans that you can cash-in whenever you need them.
+      If you're ever in a pinch, just click <b><i>REDEEM</i></b> and money will be sent your way!
+    </div>
+
+    <ngx-skeleton-loader
+      *ngIf="loans.length === 0"
+      class="card-container"
+      count="3">
+    </ngx-skeleton-loader>
+
+    <div class="card-container">
+      <mat-card class="card-container__card" *ngFor="let loan of loans">
+        <div style="display: flex; height:80%; justify-content: space-between;">
+          <div>
+            <div style="font-size: 18px; color: gray;">Loan {{loan.id}}</div>
+            <div style="font-size: 16px; font-weight: bold;">${{loan.value}}</div>
+          </div>
+          <img
+            style="height:100%;"
+            src="/assets/loan.svg"
+            alt="Picture of a bag of money"/>
+        </div>
+        <div style="margin-top: 2em;">
+          <button mat-button *ngIf="!loan.redeemed" (click)="onRedeem(loan.id)">REDEEM</button>
+          <button mat-button *ngIf="loan.redeemed" [disabled]="true">Redeemed on {{loan.redemptionTime | timePipe }}</button>
+        </div>
+      </mat-card>
+    </div>
   </ng-template>
 </amplify-authenticator>
