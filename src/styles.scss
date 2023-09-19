@@ -11,3 +11,23 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .skeleton-loader {
   width: unset !important;
 }
+
+.amplify-authenticator__federated-text {
+  margin: 0 !important;
+}
+
+.federated-sign-in-container {
+  padding: 0 !important;
+}
+
+.amplify-authenticator__column {
+  display: none !important;
+}
+
+.amplify-divider {
+  display: none !important;
+}
+
+amplify-slot[name="sign-in-footer"] {
+  display: none !important;
+}

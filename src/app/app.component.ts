@@ -39,10 +39,10 @@ export class AppComponent implements OnInit {
     this.loans = [];
     API.patch('loanApi', `/loans/${id}`, {})
       .then((x) => {
-        this._snackBar.open('Loan Redeemed!');
+        this._snackBar.open('Loan Redeemed!', 'x', { duration: 5000 });
       })
       .catch((err) => {
-        this._snackBar.open('There was an issue redeeming the loan!');
+        this._snackBar.open('There was an issue redeeming the loan!', 'x', { duration: 5000 });
       })
       .finally(() => {
         this._loadLoans();
