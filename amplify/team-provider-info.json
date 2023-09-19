@@ -1,0 +1,36 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-katybdayapp-staging-43519-authRole",
+      "UnauthRoleArn": "arn:aws:iam::276500115121:role/amplify-katybdayapp-staging-43519-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::276500115121:role/amplify-katybdayapp-staging-43519-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-katybdayapp-staging-43519-deployment",
+      "UnauthRoleName": "amplify-katybdayapp-staging-43519-unauthRole",
+      "StackName": "amplify-katybdayapp-staging-43519",
+      "StackId": "arn:aws:cloudformation:us-east-2:276500115121:stack/amplify-katybdayapp-staging-43519/f0465dc0-56a5-11ee-aefc-0621a9078533",
+      "AmplifyAppId": "d2pi4lh7c37eqo",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-katybdayapp-staging-43519-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    },
+    "categories": {
+      "function": {
+        "loanHandler": {
+          "deploymentBucketName": "amplify-katybdayapp-staging-43519-deployment",
+          "s3Key": "amplify-builds/loanHandler-73354b695261542f7759-build.zip"
+        }
+      },
+      "auth": {
+        "katybdayapp": {}
+      },
+      "api": {
+        "loanApi": {}
+      },
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "d2pi4lh7c37eqo",
+          "type": "cicd"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "paths": {
+    "/loans": {
+      "name": "/loans",
+      "lambdaFunction": "loanHandler",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "read",
+          "update"
+        ]
+      }
+    }
+  }
+}
