@@ -20,7 +20,9 @@
         }
       },
       "auth": {
-        "katybdayapp": {}
+        "katybdayapp": {
+          "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://main.d2pi4lh7c37eqo.amplifyapp.com/\"],\"LogoutURLs\":[\"https://main.d2pi4lh7c37eqo.amplifyapp.com/\"]}"
+        }
       },
       "api": {
         "loanApi": {}
