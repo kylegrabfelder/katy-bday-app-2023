@@ -14,7 +14,6 @@
     },
     "categories": {
       "auth": {
-        "katybdayapp2023": {},
         "katybdayapp2023d5d8f512": {
           "userPoolId": "us-east-2_KltFC5db9",
           "userPoolName": "hey-homie-users",
