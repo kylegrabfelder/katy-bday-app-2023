@@ -1,0 +1,85 @@
+{
+  "api": {
+    "loanApi": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "loanProcessor"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    }
+  },
+  "auth": {
+    "katybdayapp2023d5d8f512": {
+      "customAuth": false,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
+      "serviceType": "imported"
+    }
+  },
+  "function": {
+    "loanProcessor": {
+      "build": true,
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_auth_katybdayapp2023d5d8f512_nativeClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "katybdayapp2023d5d8f512"
+        }
+      ]
+    },
+    "AMPLIFY_auth_katybdayapp2023d5d8f512_userPoolId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "katybdayapp2023d5d8f512"
+        }
+      ]
+    },
+    "AMPLIFY_auth_katybdayapp2023d5d8f512_userPoolName": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "katybdayapp2023d5d8f512"
+        }
+      ]
+    },
+    "AMPLIFY_auth_katybdayapp2023d5d8f512_webClientId": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "katybdayapp2023d5d8f512"
+        }
+      ]
+    },
+    "AMPLIFY_function_loanProcessor_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "loanProcessor"
+        }
+      ]
+    },
+    "AMPLIFY_function_loanProcessor_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "loanProcessor"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,16 @@
+/* You can add global styles to this file, and also import other style files */
+.amplify-authenticator__column {
+  display: none;
+}
+
+.amplify-divider {
+  display: none;
+}
+
+amplify-slot[name="sign-in-footer"] {
+  display: none !important;
+}
+
+.federated-sign-in-container {
+  padding: 0;
+}
