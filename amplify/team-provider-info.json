@@ -21,7 +21,7 @@
       },
       "auth": {
         "katybdayapp": {
-          "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://main.d2pi4lh7c37eqo.amplifyapp.com/\"],\"LogoutURLs\":[\"https://main.d2pi4lh7c37eqo.amplifyapp.com/\"]}"
+          "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://hey-homie.kg-dev.net/\"],\"LogoutURLs\":[\"https://hey-homie.kg-dev.net/\"]}"
         }
       },
       "api": {
