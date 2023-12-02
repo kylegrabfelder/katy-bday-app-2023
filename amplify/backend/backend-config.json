@@ -75,6 +75,14 @@
     }
   },
   "parameters": {
+    "AMPLIFY_auth_katybdayapp_oAuthMetadata": {
+      "usedBy": [
+        {
+          "category": "auth",
+          "resourceName": "katybdayapp"
+        }
+      ]
+    },
     "AMPLIFY_function_loanHandler_deploymentBucketName": {
       "usedBy": [
         {

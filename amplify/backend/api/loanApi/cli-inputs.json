@@ -11,6 +11,30 @@
           "update"
         ]
       }
+    },
+    "/ledger": {
+      "name": "/ledger",
+      "lambdaFunction": "loanHandler",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update"
+        ]
+      }
+    },
+    "/ledger/{id}": {
+      "name": "/ledger/{id}",
+      "lambdaFunction": "loanHandler",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update"
+        ]
+      }
     }
   }
 }
