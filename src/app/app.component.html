@@ -6,32 +6,104 @@
       </mat-toolbar-row>
     </mat-toolbar>
 
-    <!-- <div class="info-text">
-      For the college girl in need of money, here are three free loans that you can cash-in whenever you need them.
-      If you're ever in a pinch, just click <b><i>REDEEM</i></b> and money will be sent your way!
-    </div> -->
-
     <ngx-skeleton-loader
-      *ngIf="loans.length === 0"
-      class="card-container"
-      count="3">
+      *ngIf="!ledger"
+      class="skeleton-container"
+      count="2">
     </ngx-skeleton-loader>
 
-    <div class="card-container">
-      <mat-card class="card-container__card" *ngFor="let loan of loans">
-        <div style="display: flex; height:80%; justify-content: space-between;">
-          <div>
-            <div style="font-size: 18px; color: gray;">Loan {{loan.id}}</div>
-            <div style="font-size: 16px; font-weight: bold;">${{loan.value}}</div>
-          </div>
-          <img
-            style="height:100%;"
-            src="/assets/loan.svg"
-            alt="Picture of a bag of money"/>
+    <div class="container" *ngIf="ledger">
+      <mat-card class="ledger">
+        <div class="toolbar">
+          <span>Loans</span>
+
+          <button mat-flat-button extended color="primary" (click)="requestLoan()">
+            <mat-icon>add</mat-icon>
+            Request a Loan
+          </button>
         </div>
-        <div style="margin-top: 2em;">
-          <button mat-button *ngIf="!loan.redeemed" (click)="onRedeem(loan.id)">REDEEM</button>
-          <button mat-button *ngIf="loan.redeemed" [disabled]="true">Redeemed on {{loan.redemptionTime | timePipe }}</button>
+
+        <div class="stats">
+          <div>
+            <div class="label-toolbar">Unpaid Loans ({{unpaidLoans}})</div>
+            <div class="value">${{ledger.stats.debt}}</div>
+          </div>
+
+          <div>
+            <div class="label-toolbar">Overall Loans ({{ledger.loans.length}})</div>
+            <div class="value">${{ledger.stats.lent}}</div>
+          </div>
+        </div>
+
+        <div class="txs">
+          <div *ngFor="let loan of ledger.loans" class="tx">
+            <div class="header">
+              <div>
+                <div class="label">Loan Amount</div>
+                <div class="value">${{loan.value}}</div>
+              </div>
+  
+              <div>
+                <div class="label">Loan Date</div>
+                <div class="value">{{ loan.createTime | timePipe }}</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 2em;">
+              <button mat-button *ngIf="!loan.paidOff" (click)="onPayOff(loan.id)">
+                <mat-icon>payment</mat-icon>
+                Pay Off
+              </button>
+              <button mat-button *ngIf="loan.paidOff" [disabled]="true">Paid off on {{loan.paidOffTime| timePipe }}</button>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="ledger">
+        <div class="toolbar">
+          <span>Gifts</span>
+
+          <button mat-flat-button extended color="primary" (click)="addGift()" *ngIf="isSuperUser">
+            <mat-icon>add</mat-icon>
+            Add a Gift
+          </button>
+        </div>
+
+        <div class="stats">
+          <div>
+            <div class="label-toolbar">Redeemable Gifts ({{unredeemedGifts}})</div>
+            <div class="value">${{ledger.stats.redeemable}}</div>
+          </div>
+
+          <div>
+            <div class="label-toolbar">Overall Gifts ({{ledger.gifts.length}})</div>
+            <div class="value">${{ledger.stats.gifted}}</div>
+          </div>
+        </div>
+
+        <div class="txs">
+          <div *ngFor="let gift of ledger.gifts" class="tx">
+            <div class="header">
+              <div>
+                <div class="label">Gift Amount</div>
+                <div class="value">${{gift.value}}</div>
+              </div>
+  
+              <div>
+                <div class="label">Gift Date</div>
+                <div class="value">{{ gift.createTime | timePipe }}</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 2em;">
+              <button mat-button *ngIf="!gift.redeemed" (click)="onRedeem(gift.id)">
+                <mat-icon>redeem</mat-icon>
+                Redeem
+              </button>
+              <button mat-button *ngIf="gift.redeemed" [disabled]="true">Redeemed on {{ gift.redemptionTime | timePipe }}</button>
+            </div>
+          </div>
         </div>
       </mat-card>
     </div>

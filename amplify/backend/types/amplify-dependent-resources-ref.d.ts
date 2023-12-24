@@ -19,11 +19,6 @@ export type AmplifyDependentResourcesAttributes = {
       "UserPoolName": "string"
     }
   },
-  "custom": {
-    "loanTopic": {
-      "snsTopicArn": "string"
-    }
-  },
   "function": {
     "loanHandler": {
       "Arn": "string",

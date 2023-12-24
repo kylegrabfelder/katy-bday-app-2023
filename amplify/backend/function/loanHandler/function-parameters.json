@@ -3,8 +3,10 @@
   "permissions": {
     "storage": {
       "loans": [
+        "create",
         "read",
-        "update"
+        "update",
+        "delete"
       ]
     }
   }

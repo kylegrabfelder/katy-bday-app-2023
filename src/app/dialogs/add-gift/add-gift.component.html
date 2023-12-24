@@ -1,0 +1,14 @@
+<div class="wrapper">
+  <h1 mat-dialog-title>Add Gift</h1>
+  <div mat-dialog-content>
+    <p>How much would you like to gift?</p>
+    <mat-form-field>
+      <mat-label>Gift Amount</mat-label>
+      <input type="number" matInput [(ngModel)]="giftValue">
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="onClose(false)">Close</button>
+    <button mat-button (click)="onSave()" [disabled]="!giftValue">Save</button>
+  </div>
+</div>

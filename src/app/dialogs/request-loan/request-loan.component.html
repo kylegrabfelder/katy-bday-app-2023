@@ -1,0 +1,14 @@
+<div class="wrapper">
+  <h1 mat-dialog-title>Request Loan</h1>
+  <div mat-dialog-content>
+    <p>How much would you like to request?</p>
+    <mat-form-field>
+      <mat-label>Loan Amount</mat-label>
+      <input type="number" matInput [(ngModel)]="loanValue">
+    </mat-form-field>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="onClose(false)">Close</button>
+    <button mat-button (click)="onSave()" [disabled]="!loanValue">Save</button>
+  </div>
+</div>

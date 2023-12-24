@@ -1,45 +1,55 @@
 const { DynamoDBClient, QueryCommand, UpdateItemCommand, PutItemCommand } = require('@aws-sdk/client-dynamodb');
-const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
+const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
+const { SESv2Client, SendEmailCommand } = require('@aws-sdk/client-sesv2');
 const ULID = require('ulid');
 
 const dynamoClient = new DynamoDBClient({});
-const snsClient = new SNSClient({});
+const sesClient = new SESv2Client({});
 
 const SUPER_ADMIN_SUFFIX = 'CognitoSignIn:958a0a61-7f30-43e0-8007-075d5646ca12';
 
 exports.getLedger = async (event) => {
-  const cmd = new QueryCommand({
-    TableName: process.env.STORAGE_LOANS_NAME,
-    KeyConditionExpression: 'pk = :pk',
-    ExpressionAttributeValues: {
-      ':pk': { S: 'ledger' }
-    }
-  });
-
-  const { Items } = await dynamoClient.send(cmd);
-
-  const gifts = Items.filter((x) => x.type.S === 'gift').map((x) => ({
-    redeemed: x.redeemed.BOOL,
-    createTime: 
-    redemptionTime: x.time?.S,
-    id: x.sk.S,
-    value: x.value.N
-  }));
-
-  const loans = Items.filter((x) => x.type.S === 'loan').map((x) => ({
-    requestTime: x.time.S,
-    paidOff: x.paidOff.BOOL,
-    id: x.sk.S,
-    value: x.value.N
-  }));
-
-  const stats = {
-    totalGifted: gifts.reduce((a, b) => a + b.value, 0),
-    totalLent: loans.reduce((a, b) => a + b.value, 0),
-    debt: loans.filter((x) => !x.paidOff).reduce((a, b) => a + b.value, 0)
-  };
-
-  return exports.buildResponse(200, { stats, gifts, loans });
+  try {
+    const cmd = new QueryCommand({
+      TableName: process.env.STORAGE_LOANS_NAME,
+      ScanIndexForward: false,
+      KeyConditionExpression: 'pk = :pk',
+      ExpressionAttributeValues: marshall({
+        ':pk': 'ledger'
+      })
+    });
+  
+    const { Items } = await dynamoClient.send(cmd);
+    const records = Items.map((x) => unmarshall(x));
+  
+    const gifts = records.filter((x) => x.type === 'gift').map((x) => ({
+      redeemed: x.redeemed,
+      createTime: x.createTime,
+      redemptionTime: x.redemptionTime,
+      id: x.sk,
+      value: x.value
+    }));
+  
+    const loans = records.filter((x) => x.type === 'loan').map((x) => ({
+      createTime: x.createTime,
+      paidOff: x.paidOff,
+      paidOffTime: x.paidOffTime,
+      id: x.sk,
+      value: x.value
+    }));
+  
+    const stats = {
+      gifted: gifts.reduce((a, b) => a + b.value, 0),
+      redeemable: gifts.filter((x) => !x.redeemed).reduce((a, b) => a + b.value, 0),
+      lent: loans.reduce((a, b) => a + b.value, 0),
+      debt: loans.filter((x) => !x.paidOff).reduce((a, b) => a + b.value, 0)
+    };
+  
+    return exports.buildResponse(200, { stats, gifts, loans });
+  } catch (err) {
+    console.error(err.message);
+    return exports.buildResponse(500, 'Unexpected error');
+  }
 }
 
 exports.addGift = async (event) => {
@@ -49,125 +59,171 @@ exports.addGift = async (event) => {
     });
   }
 
-  const { value } = JSON.parse(event.body);
+  try {
+    const { value } = JSON.parse(event.body);
 
-  const cmd = new PutItemCommand({
-    pk: { S: 'ledger' },
-    sk: { S: `${ULID.ulid()}` },
-    redeemed: { BOOL: false },
-    createdDate: { S: new Date().toISOString() },
-    type: { S: 'gift' },
-    value: { N: value }
-  });
+    if (typeof value !== 'number') {
+      return exports.buildResponse(400, 'Invalid value provided');
+    }
 
-  await dynamoClient.send(cmd);
+    const cmd = new PutItemCommand({
+      TableName: process.env.STORAGE_LOANS_NAME,
+      ConditionExpression: 'attribute_not_exists(pk) AND attribute_not_exists(sk)',
+      Item: marshall({
+        pk: 'ledger',
+        sk: ULID.ulid(),
+        redeemed: false,
+        createTime: new Date().toISOString(),
+        type: 'gift',
+        value: value
+      })
+    });
+  
+    await dynamoClient.send(cmd);
+
+    await sendEmail('AddGift', value, 'katygrabfelder@gmail.com');
+
+    return exports.buildResponse(201, 'Gift added successfully');
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      return exports.buildResponse(400, 'Gift already exists');
+    }
+
+    console.error(err.message);
+    return exports.buildResponse(500, 'Unexpected error');
+  }
 };
 
 exports.redeemGift = async (event) => {
-  const { id } = event.pathParameters;
+  try {
+    const { id } = event.pathParameters;
 
-  const updateCmd = new UpdateItemCommand({
-    TableName: process.env.STORAGE_LOANS_NAME,
-    Key: {
-      pk: { S: 'ledger' },
-      sk: { S: `${id}` }
-    },
-    ConditionExpression: 'attribute_exists(pk) AND attribute_exists(sk) AND #redeemed = :false AND #type = :gift',
-    UpdateExpression: 'SET #redeemed = :redeemed, #redemptionTime = :time',
-    ExpressionAttributeNames: {
-      '#redeemed': 'redeemed',
-      '#redemptionTime': 'redemptionTime',
-      '#type': 'type'
-    },
-    ExpressionAttributeValues: {
-      ':redeemed': { BOOL: true },
-      ':time': { S: new Date().toISOString() },
-      ':false': { BOOL: false },
-      ':gift': { S: 'gift' }
-    },
-    ReturnValues: 'ALL_NEW'
-  });
+    if (!id) {
+      return exports.buildResponse(400, 'Invalid id provided');
+    }
 
-  const { Attributes } = await dynamoClient.send(updateCmd);
+    const updateCmd = new UpdateItemCommand({
+      TableName: process.env.STORAGE_LOANS_NAME,
+      Key: marshall({
+        pk: 'ledger',
+        sk: `${id}`
+      }),
+      ConditionExpression: 'attribute_exists(pk) AND attribute_exists(sk) AND #redeemed = :false AND #type = :gift',
+      UpdateExpression: 'SET #redeemed = :redeemed, #redemptionTime = :redemptionTime',
+      ExpressionAttributeNames: {
+        '#redeemed': 'redeemed',
+        '#redemptionTime': 'redemptionTime',
+        '#type': 'type'
+      },
+      ExpressionAttributeValues: marshall({
+        ':redeemed': true,
+        ':redemptionTime': new Date().toISOString(),
+        ':false': false,
+        ':gift': 'gift'
+      }),
+      ReturnValues: 'ALL_NEW'
+    });
 
-  const notifyCmd = new PublishCommand({
-    TopicArn: 'arn:aws:sns:us-east-2:276500115121:loan-topic-katybdayapp-staging',
-    Message: `Katy redeemed gift ${Attributes.sk.S} for $${Attributes.value.N}`,
-    Subject: 'Gift Redeemed'
-  });
+    const { Attributes } = await dynamoClient.send(updateCmd);
 
-  await snsClient.send(notifyCmd);
+    await sendEmail('RedeemGift', Attributes.value.N, 'kylegrabfelder@gmail.com');
 
-  return exports.buildResponse(204, { message: 'Gift Redeemed' });
+    return exports.buildResponse(204, 'Gift redeemed successfully');
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      return exports.buildResponse(400, 'The specified gift cannot be redeemed');
+    }
+
+    console.error(err.message);
+    return exports.buildResponse(500, 'Unexpected error');
+  }
 };
 
 exports.requestLoan = async (event) => {
-  const { value } = JSON.parse(event.body);
+  try {
+    const { value } = JSON.parse(event.body);
 
-  const cmd = new PutItemCommand({
-    TableName: process.env.STORAGE_LOANS_NAME,
-    ConditionExpression: 'attribute_not_exists(pk) AND attribute_not_exists(sk)',
-    Item: {
-      pk: { S: 'ledger' },
-      sk: { S: `${ULID.ulid()}` },
-      requestTime: { S: new Date().toISOString() },
-      paidOff: { BOOL: false },
-      type: { S: 'loan' },
-      value: { N: value }
+    if (typeof value !== 'number') {
+      return exports.buildResponse(400, 'Invalid value provided');
     }
-  });
 
-  await dynamoClient.send(cmd);
+    const cmd = new PutItemCommand({
+      TableName: process.env.STORAGE_LOANS_NAME,
+      ConditionExpression: 'attribute_not_exists(pk) AND attribute_not_exists(sk)',
+      Item: marshall({
+        pk: 'ledger',
+        sk: ULID.ulid(),
+        createTime: new Date().toISOString(),
+        paidOff: false,
+        type: 'loan',
+        value: value
+      })
+    });
 
-  const notifyCmd = new PublishCommand({
-    TopicArn: 'arn:aws:sns:us-east-2:276500115121:loan-topic-katybdayapp-staging',
-    Message: `Katy is requesting $${Attributes.value.N}`,
-    Subject: 'Loan Requested'
-  });
+    await dynamoClient.send(cmd);
 
-  await snsClient.send(notifyCmd);
+    await sendEmail('RequestLoan', value, 'kylegrabfelder@gmail.com');
 
-  return exports.buildResponse(204, { message: 'Gift Redeemed' });
+    return exports.buildResponse(204, 'Loan requested');
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      return exports.buildResponse(400, 'Loan already exists');
+    }
+
+    console.error(err.message);
+    return exports.buildResponse(500, 'Unexpected error');
+  }
 };
 
 exports.payOffLoan = async (event) => {
-  const { id } = event.pathParameters;
+  try {
+    const { id } = event.pathParameters;
 
-  const updateCmd = new UpdateItemCommand({
-    TableName: process.env.STORAGE_LOANS_NAME,
-    Key: {
-      pk: { S: 'ledger' },
-      sk: { S: `${id}` }
-    },
-    ConditionExpression: 'attribute_exists(pk) AND attribute_exists(sk) AND #paidOff = :false AND #type = :loan',
-    UpdateExpression: 'SET #paidOff = :true, #payOffTime = :time',
-    ExpressionAttributeNames: {
-      '#paidOff': 'paidOff',
-      '#payOffTime': 'payOffTime',
-      '#type': 'type'
-    },
-    ExpressionAttributeValues: {
-      ':time': { S: new Date().toISOString() },
-      ':false': { BOOL: false },
-      ':true': { BOOL: true },
-      ':loan': { S: 'loan' }
+    if (!id) {
+      return exports.buildResponse(400, 'Invalid id provided');
     }
-  });
 
-  await dynamoClient.send(updateCmd);
+    const updateCmd = new UpdateItemCommand({
+      TableName: process.env.STORAGE_LOANS_NAME,
+      Key: marshall({
+        pk: 'ledger',
+        sk: `${id}`
+      }),
+      ConditionExpression: 'attribute_exists(pk) AND attribute_exists(sk) AND #paidOff = :false AND #type = :loan',
+      UpdateExpression: 'SET #paidOff = :true, #paidOffTime = :paidOffTime',
+      ExpressionAttributeNames: {
+        '#paidOff': 'paidOff',
+        '#paidOffTime': 'paidOffTime',
+        '#type': 'type'
+      },
+      ExpressionAttributeValues: marshall({
+        ':paidOffTime': new Date().toISOString(),
+        ':false': false,
+        ':true': true,
+        ':loan': 'loan'
+      })
+    });
 
-  const notifyCmd = new PublishCommand({
-    TopicArn: 'arn:aws:sns:us-east-2:276500115121:loan-topic-katybdayapp-staging',
-    Message: `Katy paid off loan $${id}`,
-    Subject: 'Loan Paid Off'
-  });
+    await dynamoClient.send(updateCmd);
 
-  await snsClient.send(notifyCmd);
+    return exports.buildResponse(204, 'Loan paid off successfully');
+  } catch (err) {
+    if (err.name === 'ConditionalCheckFailedException') {
+      return exports.buildResponse(400, 'The specified loan cannot be paid off');
+    }
 
-  return exports.buildResponse(204, { message: 'Gift Redeemed' });
+    console.error(err.message);
+    return exports.buildResponse(500, 'Unexpected error');
+  }
 }
 
 exports.buildResponse = (statusCode, body) => {
+  if (typeof body === 'string') {
+    body = {
+      message: body
+    }
+  }
+
   return {
     statusCode,
     headers: {
@@ -180,4 +236,23 @@ exports.buildResponse = (statusCode, body) => {
 
 function isSuperAdmin(event) {
   return event.requestContext.identity.cognitoAuthenticationProvider.endsWith(SUPER_ADMIN_SUFFIX);
+}
+
+async function sendEmail(templateName, value, toAddress) {
+  const cmd = new SendEmailCommand({
+    Content: {
+      Template: {
+        TemplateName: templateName,
+        TemplateData: JSON.stringify({ value })
+      }
+    },
+    Destination: {
+      ToAddresses: [
+        toAddress
+      ]
+    },
+    FromEmailAddress: 'Hey Homie! <hey-homie@kg-dev.net>'
+  });
+
+  await sesClient.send(cmd);
 }

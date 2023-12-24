@@ -43,12 +43,7 @@
       "serviceType": "managed"
     }
   },
-  "custom": {
-    "loanTopic": {
-      "providerPlugin": "awscloudformation",
-      "service": "customCDK"
-    }
-  },
+  "custom": {},
   "function": {
     "loanHandler": {
       "build": true,

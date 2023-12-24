@@ -1,17 +1,6 @@
 {
   "version": 1,
   "paths": {
-    "/loans": {
-      "name": "/loans",
-      "lambdaFunction": "loanHandler",
-      "permissions": {
-        "setting": "private",
-        "auth": [
-          "read",
-          "update"
-        ]
-      }
-    },
     "/ledger": {
       "name": "/ledger",
       "lambdaFunction": "loanHandler",
@@ -24,8 +13,44 @@
         ]
       }
     },
-    "/ledger/{id}": {
-      "name": "/ledger/{id}",
+    "/loans/{id}": {
+      "name": "/loans/{id}",
+      "lambdaFunction": "loanHandler",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update"
+        ]
+      }
+    },
+    "/gifts/{id}": {
+      "name": "/gifts/{id}",
+      "lambdaFunction": "loanHandler",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update"
+        ]
+      }
+    },
+    "/gifts": {
+      "name": "/gifts",
+      "lambdaFunction": "loanHandler",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "create",
+          "read",
+          "update"
+        ]
+      }
+    },
+    "/loans": {
+      "name": "/loans",
       "lambdaFunction": "loanHandler",
       "permissions": {
         "setting": "private",

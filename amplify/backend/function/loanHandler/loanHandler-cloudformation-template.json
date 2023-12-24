@@ -204,6 +204,10 @@
             {
               "Effect": "Allow",
               "Action": [
+                "dynamodb:Put*",
+                "dynamodb:Create*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PartiQLInsert",
                 "dynamodb:Get*",
                 "dynamodb:BatchGetItem",
                 "dynamodb:List*",
@@ -213,7 +217,9 @@
                 "dynamodb:PartiQLSelect",
                 "dynamodb:Update*",
                 "dynamodb:RestoreTable*",
-                "dynamodb:PartiQLUpdate"
+                "dynamodb:PartiQLUpdate",
+                "dynamodb:Delete*",
+                "dynamodb:PartiQLDelete"
               ],
               "Resource": [
                 {
@@ -244,22 +250,15 @@
           "Version": "2012-10-17",
           "Statement": [
             {
+              "Effect": "Allow",
               "Action": [
-                "sns:Publish"
+                "ses:SendTemplatedEmail"
               ],
               "Resource": [
-                {
-                  "Fn::Sub": [
-                    "arn:aws:sns:*:*:loan-topic-katybdayapp-${env}",
-                    {
-                      "env": {
-                        "Ref": "env"
-                      }
-                    }
-                  ]
-                }
-              ],
-              "Effect": "Allow"
+                "arn:aws:ses:us-east-2:276500115121:identity/kg-dev.net",
+                "arn:aws:ses:us-east-2:276500115121:template/*",
+                "arn:aws:ses:us-east-2:276500115121:configuration-set/*"
+              ]
             }
           ]
         },

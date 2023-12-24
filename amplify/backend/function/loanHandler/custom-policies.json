@@ -1,6 +1,11 @@
 [
   {
-    "Action": ["sns:Publish"],
-    "Resource": ["arn:aws:sns:*:*:loan-topic-katybdayapp-${env}"]
+    "Effect": "Allow",
+    "Action": ["ses:SendTemplatedEmail"],
+    "Resource": [
+      "arn:aws:ses:us-east-2:276500115121:identity/kg-dev.net",
+      "arn:aws:ses:us-east-2:276500115121:template/*",
+      "arn:aws:ses:us-east-2:276500115121:configuration-set/*"
+    ]
   }
 ]

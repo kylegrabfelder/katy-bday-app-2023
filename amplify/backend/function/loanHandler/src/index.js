@@ -25,6 +25,8 @@ exports.getHandler = async (event) => {
   switch (event.resource) {
     case '/ledger':
       return await endpoints.getLedger(event);
+    default:
+      return endpoints.buildResponse(400, 'Invalid Endpoint');
   }
 };
 
@@ -32,6 +34,10 @@ exports.patchHandler = async (event) => {
   switch (event.resource) {
     case '/gifts/{id}':
       return await endpoints.redeemGift(event);
+    case '/loans/{id}':
+      return await endpoints.payOffLoan(event);
+    default:
+      return endpoints.buildResponse(400, 'Invalid Endpoint');
   }
 }
 
@@ -39,7 +45,9 @@ exports.postHandler = async (event) => {
   switch (event.resource) {
     case '/loans':
       return await endpoints.requestLoan(event);
-    case '/loans/{id}':
-      return await endpoints.payOffLoan(event);
+    case '/gifts':
+      return await endpoints.addGift(event);
+    default:
+      return endpoints.buildResponse(400, 'Invalid Endpoint');
   }
 }
