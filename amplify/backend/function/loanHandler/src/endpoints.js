@@ -3,6 +3,7 @@ const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
 const { SESv2Client, SendEmailCommand } = require('@aws-sdk/client-sesv2');
 const ULID = require('ulid');
 
+
 const dynamoClient = new DynamoDBClient({});
 const sesClient = new SESv2Client({});
 
